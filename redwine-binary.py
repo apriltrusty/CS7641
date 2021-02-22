@@ -12,12 +12,12 @@ from sklearn import svm
 
 from sklearn.model_selection import StratifiedKFold, train_test_split, GridSearchCV, learning_curve, validation_curve
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.metrics import plot_confusion_matrix, f1_score, make_scorer, top_k_accuracy_score, mean_squared_error
+from sklearn.metrics import plot_confusion_matrix, f1_score, make_scorer
 
 rc('font', **{'family':'sans-serif','sans-serif':['Helvetica']})
 
 def import_data():
-    data = read_csv('../../Datasets/Wine/winequality-red.csv', sep=';')
+    data = read_csv('Data/winequality-red.csv', sep=';')
 
     X = data.iloc[:,0:data.shape[1]-1]
     y = data.iloc[:,-1]
@@ -470,17 +470,17 @@ def run_experiments():
     dt_clf = DecisionTreeClassifier(criterion='gini', ccp_alpha=0.004, random_state=0)
     run_final_model(clf=dt_clf, name='Decision Tree', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
-    ann_clf = MLPClassifier(hidden_layer_sizes=(420), learning_rate_init=0.001, max_iter=1000, random_state=0)
-    run_final_model(clf=ann_clf, name='ANN', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+    # ann_clf = MLPClassifier(hidden_layer_sizes=(420), learning_rate_init=0.001, max_iter=1000, random_state=0)
+    # run_final_model(clf=ann_clf, name='ANN', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
-    adaboost_clf = AdaBoostClassifier(n_estimators=1500, learning_rate=0.01, random_state=0)
-    run_final_model(clf=adaboost_clf, name='Boosted Tree', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+    # adaboost_clf = AdaBoostClassifier(n_estimators=1500, learning_rate=0.01, random_state=0)
+    # run_final_model(clf=adaboost_clf, name='Boosted Tree', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
-    svm_clf = svm.SVC(kernel='rbf', C=1000, gamma=1, random_state=0)
-    run_final_model(clf=svm_clf, name='SVM', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+    # svm_clf = svm.SVC(kernel='rbf', C=1000, gamma=1, random_state=0)
+    # run_final_model(clf=svm_clf, name='SVM', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
-    knn_clf = KNeighborsClassifier(n_neighbors=45, weights='distance')
-    run_final_model(clf=knn_clf, name='KNN', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
+    # knn_clf = KNeighborsClassifier(n_neighbors=45, weights='distance')
+    # run_final_model(clf=knn_clf, name='KNN', X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test)
 
 
 

@@ -20,7 +20,7 @@ def import_telescope_data():
     columns = ['fLength', 'fWidth', 'fSize', 'fConc', 'fConc1', 
                'fAsym', 'fM3Long', 'fM3Trans', 'fAlpha', 'fDist', 'class']
 
-    data = read_csv('../../Datasets/Magic/magic04.data', names=columns)
+    data = read_csv('Data/magic04.data', names=columns)
 
     X = data.iloc[:,0:data.shape[1]-1]
     y = data.iloc[:,-1]
