@@ -305,8 +305,8 @@ def run_ann_experiment(X_train, y_train, do_gridsearch=False):
     clf_name = 'Artificial Neural Network'
 
     if do_gridsearch:
-        gs_params = {'hidden_layer_sizes': [(10,10,10,10), (10,10,10,10,10)],
-                     'learning_rate_init': [0.01*n for n in range(1,5)]}
+        gs_params = {'hidden_layer_sizes': [5,50,100,200,300,400,500],
+                     'learning_rate_init': [0.001*n for n in range(1,6)]}
 
         print_gridsearch_results(clf=MLPClassifier(max_iter=10000), parameters=gs_params, X_train=X_train, y_train=y_train)
 
@@ -401,7 +401,6 @@ def run_experiments():
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=True, stratify=y)
 
     # standardize the X data, using the mean and std of the training data to standardize the test data
-    # scaler = StandardScaler()
     scaler = MinMaxScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
@@ -409,9 +408,9 @@ def run_experiments():
 
     # experiments to determine best hyperparameters for various classifiers
     run_decision_tree_experiments(X_train=X_train, y_train=y_train, do_gridsearch=False)
-    run_ann_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
+    run_ann_experiment(X_train=X_train, y_train=y_train, do_gridsearch=True)
     run_boosted_tree_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
-    run_svm_experiment(X_train=X_train, y_train=y_train, do_gridsearch=True)
+    run_svm_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
     run_knn_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
 
 

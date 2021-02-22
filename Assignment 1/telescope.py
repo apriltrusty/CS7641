@@ -261,10 +261,6 @@ def run_knn_experiment(X_train, y_train, do_gridsearch=False):
     generate_learning_curve(clf=KNeighborsClassifier(n_neighbors=10, weights='uniform'), 
                             X_train=X_train, y_train=y_train, clf_name=clf_name, 
                             clf_params='k=10, uniform weighted', score_label='F-0.5 Score')
-    
-    # generate_complexity_curve(clf=KNeighborsClassifier(weights='uniform'), clf_name=clf_name,
-    #                           test_param='n_neighbors', param_values=np.array([2*n for n in range(1,16)]), param_label='k',
-    #                           X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
     # double complexity curve
     scorer = make_scorer(fbeta_score, beta=0.5)
@@ -384,7 +380,7 @@ def run_svm_experiment(X_train, y_train, do_gridsearch=False):
     clf_name = 'Support Vector Machine'
     
     if do_gridsearch:
-        gs_params = {'C': [0.1, 1, 10, 100, 1000],
+        gs_params = {'C': [0.1, 1, 10, 100],
                     'gamma': [0.0001, 0.001, 0.01, 0.1],
                     'kernel': ['RBF']}
 
@@ -442,7 +438,7 @@ def run_experiments():
     run_ann_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
     run_boosted_tree_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
     run_svm_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
-    run_knn_experiment(X_train=X_train, y_train=y_train, do_gridsearch=False)
+    run_knn_experiment(X_train=X_train, y_train=y_train, do_gridsearch=True)
 
 
     # now, train models with determined hyperparameters and see the results on the train/test sets!
