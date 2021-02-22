@@ -141,9 +141,9 @@ def run_decision_tree_experiments(X_train, y_train, do_gridsearch=False):
 
         print_gridsearch_results(clf=DecisionTreeClassifier(), parameters=gs_params, X_train=X_train, y_train=y_train)
 
-    # generate_complexity_curve(clf=DecisionTreeClassifier(criterion='gini'), clf_name=clf_name,
-    #                           test_param='ccp_alpha', param_values=np.array([(0.0001*n) for n in range(16)]),
-    #                           param_label=r'$\alpha$', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
+    generate_complexity_curve(clf=DecisionTreeClassifier(criterion='gini'), clf_name=clf_name,
+                              test_param='ccp_alpha', param_values=np.array([(0.0001*n) for n in range(16)]),
+                              param_label=r'$\alpha$', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
     generate_learning_curve(clf=DecisionTreeClassifier(ccp_alpha=0.0003, criterion='gini'), 
                             X_train=X_train, y_train=y_train, clf_name=clf_name, 
@@ -151,7 +151,6 @@ def run_decision_tree_experiments(X_train, y_train, do_gridsearch=False):
 
     # generate graph to show the depth of the tree (i.e., complexity of the model) compared to alpha
     # the lower alpha, the more complex the fitted model is, and the more prone to overfitting
-    # this is simply to support my choice of alpha as the measure of complexity for the graph above
 
     # models = []
     # test_alphas = np.array([(0.0001*n) for n in range(16)])
@@ -185,68 +184,68 @@ def run_boosted_tree_experiment(X_train, y_train, do_gridsearch=False):
         print_gridsearch_results(clf=AdaBoostClassifier(base_estimator=DecisionTreeClassifier()), 
                                  parameters=gs_params, X_train=X_train, y_train=y_train)
 
-    # generate_learning_curve(clf=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), 
-    #                         n_estimators=300, learning_rate=1.0), X_train=X_train, y_train=y_train, clf_name=clf_name, 
-    #                         clf_params='300 estimators, 1.0 learning rate', score_label='F-0.5 Score')
+    generate_learning_curve(clf=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), 
+                            n_estimators=300, learning_rate=1.0), X_train=X_train, y_train=y_train, clf_name=clf_name, 
+                            clf_params='300 estimators, 1.0 learning rate', score_label='F-0.5 Score')
     
 
     
-    generate_complexity_curve(clf=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=1.0), 
-                              clf_name=clf_name, test_param='n_estimators', param_values=np.array([800 + 100*n for n in range(13)]), 
-                              param_label='Number of Classifiers', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
+    # generate_complexity_curve(clf=AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=1.0), 
+    #                           clf_name=clf_name, test_param='n_estimators', param_values=np.array([800 + 100*n for n in range(13)]), 
+    #                           param_label='Number of Classifiers', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
 
     # special graph for boosted trees - two complexity curves in one
-    # fhalf_scorer = make_scorer(fbeta_score, beta=0.5)
+    fhalf_scorer = make_scorer(fbeta_score, beta=0.5)
     
-    # clf_1 = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=1.0, random_state=0)
-    # clf_2 = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=0.1, random_state=0)
-    # test_param = 'n_estimators'
-    # param_values = np.array([50*n for n in range(1,16)])
+    clf_1 = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=1.0, random_state=0)
+    clf_2 = AdaBoostClassifier(base_estimator=DecisionTreeClassifier(max_depth=1, criterion='gini'), learning_rate=0.1, random_state=0)
+    test_param = 'n_estimators'
+    param_values = np.array([50*n for n in range(1,16)])
 
 
-    # train_scores_1, test_scores_1 = validation_curve(
-    #     clf_1, X_train, y_train, param_name=test_param, param_range=param_values, scoring=fhalf_scorer, cv=StratifiedKFold())
+    train_scores_1, test_scores_1 = validation_curve(
+        clf_1, X_train, y_train, param_name=test_param, param_range=param_values, scoring=fhalf_scorer, cv=StratifiedKFold())
     
-    # train_scores_2, test_scores_2 = validation_curve(
-    #     clf_2, X_train, y_train, param_name=test_param, param_range=param_values, scoring=fhalf_scorer, cv=StratifiedKFold())
+    train_scores_2, test_scores_2 = validation_curve(
+        clf_2, X_train, y_train, param_name=test_param, param_range=param_values, scoring=fhalf_scorer, cv=StratifiedKFold())
     
-    # train_scores_mean_1 = np.mean(train_scores_1, axis=1)
-    # train_scores_std_1 = np.std(train_scores_1, axis=1)
-    # test_scores_mean_1 = np.mean(test_scores_1, axis=1)
-    # test_scores_std_1 = np.std(test_scores_1, axis=1)
+    train_scores_mean_1 = np.mean(train_scores_1, axis=1)
+    train_scores_std_1 = np.std(train_scores_1, axis=1)
+    test_scores_mean_1 = np.mean(test_scores_1, axis=1)
+    test_scores_std_1 = np.std(test_scores_1, axis=1)
 
-    # train_scores_mean_2 = np.mean(train_scores_2, axis=1)
-    # train_scores_std_2 = np.std(train_scores_2, axis=1)
-    # test_scores_mean_2 = np.mean(test_scores_2, axis=1)
-    # test_scores_std_2 = np.std(test_scores_2, axis=1)
+    train_scores_mean_2 = np.mean(train_scores_2, axis=1)
+    train_scores_std_2 = np.std(train_scores_2, axis=1)
+    test_scores_mean_2 = np.mean(test_scores_2, axis=1)
+    test_scores_std_2 = np.std(test_scores_2, axis=1)
 
-    # plt.title(clf_name + ' Model Complexity Curves')
-    # plt.xlabel('Number of Classifiers')
-    # plt.xticks(rotation=45)
-    # plt.ylabel('F-0.5 Score')
-    # lw = 2
+    plt.title(clf_name + ' Model Complexity Curves')
+    plt.xlabel('Number of Classifiers')
+    plt.xticks(rotation=45)
+    plt.ylabel('F-0.5 Score')
+    lw = 2
     
-    # # plot for classifier 1 (lr=1.0)
-    # plt.plot(param_values, train_scores_mean_1, label='Training score (lr=1.0)', color='darkorange', lw=lw)
-    # plt.fill_between(param_values, train_scores_mean_1 - train_scores_std_1, train_scores_mean_1 + train_scores_std_1, alpha=0.2,
-    #                 color='darkorange', lw=lw)
-    # plt.plot(param_values, test_scores_mean_1, label='Cross-validation score (lr=1.0)', color='navy', lw=lw)
-    # plt.fill_between(param_values, test_scores_mean_1 - test_scores_std_1, test_scores_mean_1 + test_scores_std_1, alpha=0.2,
-    #                 color='navy', lw=lw)
+    # plot for classifier 1 (lr=1.0)
+    plt.plot(param_values, train_scores_mean_1, label='Training score (lr=1.0)', color='darkorange', lw=lw)
+    plt.fill_between(param_values, train_scores_mean_1 - train_scores_std_1, train_scores_mean_1 + train_scores_std_1, alpha=0.2,
+                    color='darkorange', lw=lw)
+    plt.plot(param_values, test_scores_mean_1, label='Cross-validation score (lr=1.0)', color='navy', lw=lw)
+    plt.fill_between(param_values, test_scores_mean_1 - test_scores_std_1, test_scores_mean_1 + test_scores_std_1, alpha=0.2,
+                    color='navy', lw=lw)
     
-    # # plot for classifier 2 (lr=0.1)
-    # plt.plot(param_values, train_scores_mean_2, label='Training score (lr=0.1)', color='gold', lw=lw)
-    # plt.fill_between(param_values, train_scores_mean_2 - train_scores_std_2, train_scores_mean_2 + train_scores_std_2, alpha=0.2,
-    #                 color='gold', lw=lw)
-    # plt.plot(param_values, test_scores_mean_2, label='Cross-validation score (lr=0.1)', color='cornflowerblue', lw=lw)
-    # plt.fill_between(param_values, test_scores_mean_2 - test_scores_std_2, test_scores_mean_2 + test_scores_std_2, alpha=0.2,
-    #                 color='cornflowerblue', lw=lw)
+    # plot for classifier 2 (lr=0.1)
+    plt.plot(param_values, train_scores_mean_2, label='Training score (lr=0.1)', color='gold', lw=lw)
+    plt.fill_between(param_values, train_scores_mean_2 - train_scores_std_2, train_scores_mean_2 + train_scores_std_2, alpha=0.2,
+                    color='gold', lw=lw)
+    plt.plot(param_values, test_scores_mean_2, label='Cross-validation score (lr=0.1)', color='cornflowerblue', lw=lw)
+    plt.fill_between(param_values, test_scores_mean_2 - test_scores_std_2, test_scores_mean_2 + test_scores_std_2, alpha=0.2,
+                    color='cornflowerblue', lw=lw)
 
-    # plt.legend(loc='best')
-    # plt.tight_layout()
-    # plt.show()
-    # plt.close()
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    plt.close()
 
 
 def run_knn_experiment(X_train, y_train, do_gridsearch=False):
@@ -268,59 +267,59 @@ def run_knn_experiment(X_train, y_train, do_gridsearch=False):
     #                           X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
     # double complexity curve
-    # scorer = make_scorer(fbeta_score, beta=0.5)
+    scorer = make_scorer(fbeta_score, beta=0.5)
 
-    # clf_1 = KNeighborsClassifier(weights='uniform')
-    # clf_2 = KNeighborsClassifier(weights='distance')
+    clf_1 = KNeighborsClassifier(weights='uniform')
+    clf_2 = KNeighborsClassifier(weights='distance')
     
-    # test_param = 'n_neighbors'
-    # param_values = np.array([1+2*n for n in range(1,21)])
+    test_param = 'n_neighbors'
+    param_values = np.array([1+2*n for n in range(1,21)])
 
 
-    # train_scores_1, test_scores_1 = validation_curve(
-    #     clf_1, X_train, y_train, param_name=test_param, param_range=param_values, 
-    #     scoring=scorer, cv=StratifiedKFold(shuffle=True))
+    train_scores_1, test_scores_1 = validation_curve(
+        clf_1, X_train, y_train, param_name=test_param, param_range=param_values, 
+        scoring=scorer, cv=StratifiedKFold(shuffle=True))
     
-    # train_scores_2, test_scores_2 = validation_curve(
-    #     clf_2, X_train, y_train, param_name=test_param, param_range=param_values, 
-    #     scoring=scorer, cv=StratifiedKFold(shuffle=True))
+    train_scores_2, test_scores_2 = validation_curve(
+        clf_2, X_train, y_train, param_name=test_param, param_range=param_values, 
+        scoring=scorer, cv=StratifiedKFold(shuffle=True))
     
-    # train_scores_mean_1 = np.mean(train_scores_1, axis=1)
-    # train_scores_std_1 = np.std(train_scores_1, axis=1)
-    # test_scores_mean_1 = np.mean(test_scores_1, axis=1)
-    # test_scores_std_1 = np.std(test_scores_1, axis=1)
+    train_scores_mean_1 = np.mean(train_scores_1, axis=1)
+    train_scores_std_1 = np.std(train_scores_1, axis=1)
+    test_scores_mean_1 = np.mean(test_scores_1, axis=1)
+    test_scores_std_1 = np.std(test_scores_1, axis=1)
 
-    # train_scores_mean_2 = np.mean(train_scores_2, axis=1)
-    # train_scores_std_2 = np.std(train_scores_2, axis=1)
-    # test_scores_mean_2 = np.mean(test_scores_2, axis=1)
-    # test_scores_std_2 = np.std(test_scores_2, axis=1)
+    train_scores_mean_2 = np.mean(train_scores_2, axis=1)
+    train_scores_std_2 = np.std(train_scores_2, axis=1)
+    test_scores_mean_2 = np.mean(test_scores_2, axis=1)
+    test_scores_std_2 = np.std(test_scores_2, axis=1)
 
-    # plt.title(clf_name + ' Model Complexity Curves')
-    # plt.xlabel('Number of Neighbors (k)')
-    # plt.xticks(rotation=45)
-    # plt.ylabel('F-0.5 Score')
-    # lw = 2
+    plt.title(clf_name + ' Model Complexity Curves')
+    plt.xlabel('Number of Neighbors (k)')
+    plt.xticks(rotation=45)
+    plt.ylabel('F-0.5 Score')
+    lw = 2
     
-    # # plot for classifier 1 (uniform)
-    # plt.plot(param_values, train_scores_mean_1, label='Training score (uniform weight)', color='darkorange', lw=lw)
-    # plt.fill_between(param_values, train_scores_mean_1 - train_scores_std_1, train_scores_mean_1 + train_scores_std_1, alpha=0.2,
-    #                 color='darkorange', lw=lw)
-    # plt.plot(param_values, test_scores_mean_1, label='Cross-validation score (uniform weight)', color='navy', lw=lw)
-    # plt.fill_between(param_values, test_scores_mean_1 - test_scores_std_1, test_scores_mean_1 + test_scores_std_1, alpha=0.2,
-    #                 color='navy', lw=lw)
+    # plot for classifier 1 (uniform)
+    plt.plot(param_values, train_scores_mean_1, label='Training score (uniform weight)', color='darkorange', lw=lw)
+    plt.fill_between(param_values, train_scores_mean_1 - train_scores_std_1, train_scores_mean_1 + train_scores_std_1, alpha=0.2,
+                    color='darkorange', lw=lw)
+    plt.plot(param_values, test_scores_mean_1, label='Cross-validation score (uniform weight)', color='navy', lw=lw)
+    plt.fill_between(param_values, test_scores_mean_1 - test_scores_std_1, test_scores_mean_1 + test_scores_std_1, alpha=0.2,
+                    color='navy', lw=lw)
     
-    # # plot for classifier 2 (distance)
-    # # plt.plot(param_values, train_scores_mean_2, label='Training score (distance weight)', color='gold', lw=lw)
-    # # plt.fill_between(param_values, train_scores_mean_2 - train_scores_std_2, train_scores_mean_2 + train_scores_std_2, alpha=0.2,
-    # #                 color='gold', lw=lw)
-    # plt.plot(param_values, test_scores_mean_2, label='Cross-validation score (distance weight)', color='cornflowerblue', lw=lw)
-    # plt.fill_between(param_values, test_scores_mean_2 - test_scores_std_2, test_scores_mean_2 + test_scores_std_2, alpha=0.2,
-    #                 color='cornflowerblue', lw=lw)
+    # plot for classifier 2 (distance)
+    # plt.plot(param_values, train_scores_mean_2, label='Training score (distance weight)', color='gold', lw=lw)
+    # plt.fill_between(param_values, train_scores_mean_2 - train_scores_std_2, train_scores_mean_2 + train_scores_std_2, alpha=0.2,
+    #                 color='gold', lw=lw)
+    plt.plot(param_values, test_scores_mean_2, label='Cross-validation score (distance weight)', color='cornflowerblue', lw=lw)
+    plt.fill_between(param_values, test_scores_mean_2 - test_scores_std_2, test_scores_mean_2 + test_scores_std_2, alpha=0.2,
+                    color='cornflowerblue', lw=lw)
 
-    # plt.legend(loc='best')
-    # plt.tight_layout()
-    # plt.show()
-    # plt.close()
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    plt.close()
 
 
 def run_ann_experiment(X_train, y_train, do_gridsearch=False):
@@ -328,8 +327,8 @@ def run_ann_experiment(X_train, y_train, do_gridsearch=False):
 
     if do_gridsearch:
         gs_params = {'hidden_layer_sizes': [50,100,150,200,250,300],
-                 'learning_rate_init': [0.001, 0.005, 0.01, 0.05],
-                 'batch_size': [32]}
+                     'learning_rate_init': [0.001, 0.005, 0.01, 0.05],
+                     'batch_size': [100,200,300]}
 
         print_gridsearch_results(clf=MLPClassifier(max_iter=600), parameters=gs_params, X_train=X_train, y_train=y_train)
 
@@ -340,48 +339,45 @@ def run_ann_experiment(X_train, y_train, do_gridsearch=False):
                             score_label='F-0.5 Score')
 
     # # loss curve (training) and accuracy curve (validation)
-    # clf = MLPClassifier(batch_size=100, hidden_layer_sizes=(150), learning_rate_init=0.003, \
-    #                     max_iter=800, random_state=0, early_stopping=True, tol=1e-16, n_iter_no_change=160)
-    # clf.fit(X=X_train, y=y_train)
+    clf = MLPClassifier(batch_size=100, hidden_layer_sizes=(150), learning_rate_init=0.003, \
+                        max_iter=800, random_state=0, early_stopping=True, tol=1e-16, n_iter_no_change=160)
+    clf.fit(X=X_train, y=y_train)
 
-    # # plotting code from https://matplotlib.org/stable/gallery/subplots_axes_and_figures/two_scales.html
-    # fig, ax1 = plt.subplots()
+    # plotting code from https://matplotlib.org/stable/gallery/subplots_axes_and_figures/two_scales.html
+    fig, ax1 = plt.subplots()
 
-    # color = 'orchid'
-    # ax1.set_xlabel('Epoch')
-    # ax1.set_ylabel('Training Loss', color=color)
-    # ax1.plot(clf.loss_curve_, color=color)
-    # ax1.tick_params(axis='y', labelcolor=color)
-    # # ax1.set_ylim(0.25, 0.45)
+    color = 'orchid'
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Training Loss', color=color)
+    ax1.plot(clf.loss_curve_, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    # ax1.set_ylim(0.25, 0.45)
 
-    # ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
-    # color = 'orange'
-    # ax2.set_ylabel('Validation Accuracy', color=color)  # we already handled the x-label with ax1
-    # ax2.plot(clf.validation_scores_, color=color)
-    # ax2.tick_params(axis='y', labelcolor=color)
-    # moving_average = np.convolve(clf.validation_scores_, np.ones(10), 'valid') / 10
-    # ax2.plot(range(len(clf.validation_scores_) - len(moving_average), len(clf.validation_scores_)), moving_average, color='orangered')
-    # # ax2.set_ylim(0.84, 0.90)
+    color = 'orange'
+    ax2.set_ylabel('Validation Accuracy', color=color)  # we already handled the x-label with ax1
+    ax2.plot(clf.validation_scores_, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+    moving_average = np.convolve(clf.validation_scores_, np.ones(10), 'valid') / 10
+    ax2.plot(range(len(clf.validation_scores_) - len(moving_average), len(clf.validation_scores_)), moving_average, color='orangered')
+    # ax2.set_ylim(0.84, 0.90)
  
-    # plt.title('Loss and Accuracy Curves for Neural Network')
-    # fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    # plt.show()
-    # plt.close()
-
-    # loss curve, training and validation (using Keras)
-    # generate_loss_curve(X_train, y_train)
+    plt.title('Loss and Accuracy Curves for Neural Network')
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.show()
+    plt.close()
 
     # effect of number of nodes in single hidden layer
-    # generate_complexity_curve(clf=MLPClassifier(batch_size=100, max_iter=800, learning_rate_init=0.005, random_state=0), clf_name=clf_name, 
-    #                           test_param='hidden_layer_sizes', param_values=np.array([30*n for n in range(1,9)]), param_label='Number of Nodes in Hidden Layer',
-    #                           X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
+    generate_complexity_curve(clf=MLPClassifier(batch_size=100, max_iter=800, learning_rate_init=0.005, random_state=0), clf_name=clf_name, 
+                              test_param='hidden_layer_sizes', param_values=np.array([30*n for n in range(1,9)]), param_label='Number of Nodes in Hidden Layer',
+                              X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
     # effect of learning rates
-    # generate_complexity_curve(clf=MLPClassifier(batch_size=100, max_iter=800, hidden_layer_sizes=(150), random_state=0, 
-    #                                             early_stopping=True, tol=1e-16, n_iter_no_change=160), 
-    #                             clf_name=clf_name, test_param='learning_rate_init', param_values=np.array([0.001*n for n in range(1,11)]), 
-    #                             param_label='Initial Learning Rate', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
+    generate_complexity_curve(clf=MLPClassifier(batch_size=100, max_iter=800, hidden_layer_sizes=(150), random_state=0, 
+                                                early_stopping=True, tol=1e-16, n_iter_no_change=160), 
+                                clf_name=clf_name, test_param='learning_rate_init', param_values=np.array([0.001*n for n in range(1,11)]), 
+                                param_label='Initial Learning Rate', X_train=X_train, y_train=y_train, score_label='F-0.5 Score')
 
 
 def run_svm_experiment(X_train, y_train, do_gridsearch=False):
@@ -390,13 +386,13 @@ def run_svm_experiment(X_train, y_train, do_gridsearch=False):
     if do_gridsearch:
         gs_params = {'C': [0.1, 1, 10, 100, 1000],
                     'gamma': [0.0001, 0.001, 0.01, 0.1],
-                    'kernel': ['sigmoid']}
+                    'kernel': ['RBF']}
 
         print_gridsearch_results(clf=svm.SVC(), parameters=gs_params, X_train=X_train, y_train=y_train)
 
-    # generate_learning_curve(clf=svm.SVC(kernel='poly', degree=3, C=1000, gamma=0.1), 
-    #                         X_train=X_train, y_train=y_train, clf_name=clf_name, 
-    #                         clf_params='Poly kernel, degree 3, C=1000, gamma=0.1', score_label='F-0.5 Score')
+    generate_learning_curve(clf=svm.SVC(kernel='RBF', C=100, gamma=0.1), 
+                            X_train=X_train, y_train=y_train, clf_name=clf_name, 
+                            clf_params='RBF kernel, C=100, gamma=0.1', score_label='F-0.5 Score')
     
     # generate_complexity_curve(clf=svm.SVC(kernel='rbf', gamma='auto'), clf_name=clf_name,
     #                           test_param='C', param_values=np.array([1,10,100]), param_label='Regularization Parameter (C)',
@@ -420,7 +416,7 @@ def run_final_model(clf, name, X_train, y_train, X_test, y_test):
     train_score = fbeta_score(y_true=y_train, y_pred=train_predictions, beta=0.5)
     test_score = fbeta_score(y_true=y_test, y_pred=test_predictions, beta=0.5)
 
-    print('\nGot: %.2f%% F-0.5 on the train set and %.2f%% F-0.5 on the test set for the %s model.' % (train_score*100, test_score*100, name))
+    print('\nGot: %.2f%% F1 on the test set and %.2f%% F1 on the train set for the %s model.' % (test_score*100, train_score*100, name))
     print(f'{name} model took {round(train_time,5)} sec to train and {round(predict_time,5)} sec to predict.\n')
     if name == 'ANN':
         print(f'{name} model took {len(clf.loss_curve_)} iterations to train.\n')
