@@ -57,7 +57,6 @@ def generate_learning_curve(clf, X_train, y_train, clf_name, clf_params, score_l
         test_scores, fit_times, _ = learning_curve(clf, X_train, y_train, return_times=True, shuffle=True, scoring=scorer)
     
     # plotting code mainly sourced from https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
-    # also add this citation in readme, not in report
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -81,19 +80,6 @@ def generate_learning_curve(clf, X_train, y_train, clf_name, clf_params, score_l
     plt.tight_layout()
     plt.show()
     plt.close()
-
-    # Plot fit_time vs score
-    # plt.grid()
-    # plt.plot(fit_times_mean, test_scores_mean, 'o-')
-    # plt.fill_between(fit_times_mean, test_scores_mean - test_scores_std,
-    #                      test_scores_mean + test_scores_std, alpha=0.1)
-    # plt.xlabel('Seconds to fit')
-    # plt.xticks(rotation=45)
-    # plt.ylabel('Score')
-    # plt.title('Performance of the ' + clf_name + ' model\nwith ' + str(clf_params))
-    # plt.tight_layout()
-    # plt.show()
-    # plt.close()
 
 
 def generate_complexity_curve(clf, clf_name, test_param, param_values, param_label, X_train, y_train, score_label):
