@@ -1,4 +1,3 @@
-from time import perf_counter
 import mlrose_hiive
 import numpy as np
 import matplotlib.pyplot as plt
