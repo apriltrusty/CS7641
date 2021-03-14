@@ -58,7 +58,7 @@ def run_and_plot(seed=1, generate_plots=True):
     global_optima = [0 for n in range(len(lengths))]
 
     # SA parameters
-    temperature_list = [1e2] # initial temperature -- higher means more exploration
+    temperature_list = [1] # initial temperature -- higher means more exploration
     decay_list = [mlrose_hiive.ExpDecay] # slower decay means more exploration. exp decays slower than geom.
 
     # GA parameters
@@ -87,15 +87,14 @@ def run_and_plot(seed=1, generate_plots=True):
         print(f'Starting length {length}')
         problem = mlrose_hiive.MaxKColorGenerator.generate(seed=seed, number_of_nodes=length, max_colors=5)
         
-        
         runners = [mlrose_hiive.SARunner(problem=problem, experiment_name='SA', seed=seed, iteration_list=iteration_list, 
-                                        temperature_list=temperature_list, decay_list=decay_list, max_attempts=40),
+                                        temperature_list=temperature_list, decay_list=decay_list, max_attempts=10),
 
                     mlrose_hiive.GARunner(problem=problem, experiment_name='GA', seed=seed, iteration_list=iteration_list, 
-                                            population_sizes=population_sizes, mutation_rates=mutation_rates, max_attempts=30),
+                                            population_sizes=population_sizes, mutation_rates=mutation_rates, max_attempts=10),
 
                     mlrose_hiive.RHCRunner(problem=problem, experiment_name='RHC', seed=seed, iteration_list=iteration_list, 
-                                            restart_list=restart_list, max_attempts=30),
+                                            restart_list=restart_list, max_attempts=10),
 
                     mlrose_hiive.MIMICRunner(problem=problem, experiment_name='MIMIC', seed=seed, iteration_list=iteration_list, 
                                                 population_sizes=population_sizes, keep_percent_list=keep_percent_list, 
