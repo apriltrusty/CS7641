@@ -14,7 +14,7 @@ def run_and_plot(seed=1, generate_plots=True):
     fixed_length = 100 # for this length, plot iteration versus fitness
 
     # SA parameters
-    temperature_list = [1e6] # initial temperature -- higher means more exploration
+    temperature_list = [100] # initial temperature -- higher means more exploration
     decay_list = [mlrose_hiive.ExpDecay] # slower decay means more exploration. exp slower than geom.
 
     # GA parameters
