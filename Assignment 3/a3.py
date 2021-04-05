@@ -19,7 +19,6 @@ from sklearn.decomposition import FastICA, PCA, KernelPCA
 from sklearn.random_projection import GaussianRandomProjection as RP
 
 from yellowbrick.features import Rank2D
-from kneed import KneeLocator
 
 
 # width, height
@@ -333,7 +332,6 @@ def experiment_2(X, y, dataset_name, n_features, save_graphs):
         ica_re.append(np.sum(abs(X - reconstructed_data), axis=None) / X.size)
     
     if save_graphs:
-        
         # plot kurtosis
         markers_on = [n_ICA-1]
         plt.plot(n_components_range, avg_kurtoses, 'o', ls='-', color='olive', label='Average Kurtosis', markevery=markers_on)
@@ -419,10 +417,13 @@ def experiment_2(X, y, dataset_name, n_features, save_graphs):
         reconstruction_errors.append(r)
     
     if save_graphs:
-        
         markers_on = [n_RP-1]
+        plt.fill_between(n_components_range, np.average(reconstruction_errors, axis=0) - np.std(reconstruction_errors, axis=0), 
+                                             np.average(reconstruction_errors, axis=0) + np.std(reconstruction_errors, axis=0), 
+                                             alpha=0.25, color='rebeccapurple')
         for run in range(10):
             plt.plot(n_components_range, reconstruction_errors[run], 'o', ls='-', color=contrasting_colors[run], markevery=markers_on)
+        plt.plot(n_components_range, np.average(reconstruction_errors, axis=0), 'o', linewidth=1.5, ls='dashed', color='black', markevery=markers_on)
         plt.xlabel('Number of Components (n)')
         title = f'RP Mean Absolute Reconstruction Error for {dataset_name} Data'
         # plt.title(title)
