@@ -52,20 +52,6 @@ def import_red_wine_data():
     return data, X, y
 
 
-def import_wine_data():
-    data = pd.read_csv('Data/winequality.csv', sep=';')
-    data.rename(columns={'quality':'color'})
-
-    X = data.iloc[:,0:data.shape[1]-1]
-    y = data.iloc[:,-1]
-
-    # 0 is red, 1 is white
-    y.iloc[:1599] = 0
-    y.iloc[1599:] = 1
-
-    return data, X, y
-
-
 def import_telescope_data():
     columns = ['fLength', 'fWidth', 'fSize', 'fConc', 'fConc1', 
                'fAsym', 'fM3Long', 'fM3Trans', 'fAlpha', 'fDist', 'class']
@@ -99,7 +85,7 @@ def split_and_scale(X, y, scaler=StandardScaler(), pct=0.5):
 def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=None, save_graphs=True, dim_red='No'):
     """Run the clustering algorithms on the datasets and describe what you see."""
     
-    # source for calculating & displaying results: 
+    # based on: 
     # https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_digits.html
     def eval_against_labels(X, y, estimator, estimator_name):    
         
@@ -135,18 +121,6 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
             print('Cluster {}, Label 0: {}'.format(i, y[y_pred == i].shape[0] - y[y_pred == i].sum()))
             print('Cluster {}, Label 1: {}'.format(i, y[y_pred == i].sum()))
 
-        # if estimator_name == 'K-Means':
-        #     print('time\tinertia\thomo\tcompl\tv-meas\tARI\tAMI\tsilhouette\tharabasz\tdavies')
-        #     formatter_result = ("{:.3f}s\t{:.0f}\t{:.3f}\t{:.3f}"
-        #                         "\t{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}\t\t{:.3f}\t\t{:.3f}")
-        
-        # else:
-        #     print('time\t\thomo\tcompl\tv-meas\tARI\tAMI\tsilhouette\tharabasz\tdavies')
-        #     formatter_result = ("{:.3f}s\t\t{:.3f}\t{:.3f}"
-        #                         "\t{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}\t\t{:.3f}\t\t{:.3f}")
-
-        # print(formatter_result.format(*results))
-
         return y_pred
     
     def plot_TSNE(X, cluster_labels, title=None, p=30):
@@ -175,17 +149,10 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
 
     k_means_k = n_clusters_k_means[dim_red]
     gmm_k = n_clusters_gmm[dim_red]
-    """
+    
     for k in k_range:
         # print(f'Testing k={k} for K-Means.')
         estimator = KMeans(n_clusters=k, random_state=1)
-        
-        if save_graphs:
-            visualizer = SilhouetteVisualizer(estimator, colors='sns_muted')
-            visualizer.fit(X)
-            visualizer.show(outpath=f'Graphs/{dataset_name}/Experiment {exp_num}/Silhouettes/Silhouettes K-Means k={k} with {dim_red} Dimensionality Reduction, {dataset_name}.png')
-            plt.close()
-        
 
         t0 = perf_counter()
         estimator.fit(X)
@@ -199,10 +166,9 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
         else:
             calinskis.append(metrics.calinski_harabasz_score(X, y_pred)/1000)
         davies.append(metrics.davies_bouldin_score(X, y_pred))
-    """
+    
     
     if save_graphs:
-        """
         sil_color = 'navy'
         cal_color = 'orange'
         davies_color = 'green'
@@ -262,7 +228,6 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
         davies.append(metrics.davies_bouldin_score(X, y_pred))
     
     if save_graphs:
-        
         bic_color = 'salmon'
         sil_color = 'navy'
         cal_color = 'orange'
@@ -317,7 +282,7 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
         gmm_clf.fit(X)
         cluster_labels = gmm_clf.predict(X) # cluster labels
         plot_TSNE(X, cluster_labels, title=f'TSNE (Perplexity {p}) for {dataset_name} Data\nClustered with GMM to {gmm_k} Clusters, {dim_red} Dimensionality Reduction', p=p)
-    """
+    
     # see how k-Means and GMM do when compared against labels!
     kmeans_clf = KMeans(n_clusters=k_means_k, random_state=1)
     labels_k = eval_against_labels(X=X, y=y, estimator=kmeans_clf, estimator_name='K-Means')
@@ -334,8 +299,6 @@ def experiment_1(X, y, dataset_name, n_clusters_k_means=None, n_clusters_gmm=Non
                 centers.to_excel(writer, sheet_name=f'{dim_red} Reduc. Centers')
 
     return labels_k, labels_gmm
-
-
 
 
 def experiment_2(X, y, dataset_name, n_features, save_graphs):
@@ -424,7 +387,6 @@ def experiment_2(X, y, dataset_name, n_features, save_graphs):
 
     
     if save_graphs:
-        
         # plot eigenvalues
         markers_on = [n_PCA-1]
         plt.fill_between(n_components_range, np.array(avg_eigenvalues) - np.array(std_eigenvalues),
@@ -502,15 +464,8 @@ def experiment_2(X, y, dataset_name, n_features, save_graphs):
             std_eigenvalues.append(np.std(kpca.lambdas_))
             avg_eigenvalues.append(np.average(kpca.lambdas_))
             sum_eigenvalues.append(sum(kpca.lambdas_))
-
-        # linear: same as regular PCA, 4 and 5
-        # RBF: 6 (avg) or 4 (sum)
-        # poly: 3 (avg) or 4 (sum)
-        # sigmoid: 4 (avg) or 5 (sum)
         
         if save_graphs:
-            # plot eigenvalues
-            
             markers_on = [n_KPCA-1]
             plt.fill_between(n_components_range, np.array(avg_eigenvalues) - np.array(std_eigenvalues),
                          np.array(avg_eigenvalues) + np.array(std_eigenvalues), alpha=0.25,
@@ -535,9 +490,6 @@ def experiment_2(X, y, dataset_name, n_features, save_graphs):
             sns.pairplot(pd.DataFrame(np.hstack((transformed_X,np.atleast_2d(y).T))), hue=n_KPCA, x_vars=[0], y_vars=[1])
             plt.savefig(f'Graphs/{dataset_name}/Experiment 2/Pairplot for KPCA with {n_KPCA}.png')
             plt.close()
-    
-
-    print('hi')
             
 
 def experiment_3(X, y, n_features, n_clusters_k_means, n_clusters_gmm, dataset_name):
@@ -566,7 +518,7 @@ def experiment_3(X, y, n_features, n_clusters_k_means, n_clusters_gmm, dataset_n
         else: X_transformed = X
 
         labels_k, labels_gmm = experiment_1(X=X_transformed, y=y, dataset_name=dataset_name, n_clusters_k_means=n_clusters_k_means, 
-                                            n_clusters_gmm=n_clusters_gmm, dim_red=reducer_name, save_graphs=False)
+                                            n_clusters_gmm=n_clusters_gmm, dim_red=reducer_name, save_graphs=True)
         labels.append((reducer_name + ' k', labels_k))
         labels.append((reducer_name + ' gmm', labels_gmm))
         
@@ -590,11 +542,8 @@ def experiment_3(X, y, n_features, n_clusters_k_means, n_clusters_gmm, dataset_n
 
     clusters_df = pd.DataFrame(np.array([l[1] for l in labels]).T, columns=[l[0] for l in labels])
 
-    # with pd.ExcelWriter(f'{dataset_name}_clusters.xlsx') as writer:
-    #             clusters_df.to_excel(writer, sheet_name='Clusters')
-
-    print('hi')
-    print('hello my sweetie <3')
+    with pd.ExcelWriter(f'{dataset_name}_clusters.xlsx') as writer:
+                clusters_df.to_excel(writer, sheet_name='Clusters')
 
 
 def experiment_4(X_train, y_train, X_test, y_test, n_features, nn_params, dataset_name):
@@ -607,11 +556,7 @@ def experiment_4(X_train, y_train, X_test, y_test, n_features, nn_params, datase
     n_RP = n_features['RP']
     n_KPCA = n_features['KPCA']
 
-    if dataset_name == 'Red Wine Quality' or dataset_name == 'Wine Quality':
-        kernel = 'rbf'
-    else:
-        assert dataset_name == 'Telescope'
-        kernel = 'poly'
+    kernel = 'rbf'
 
     dimensionality_reducers = [(None, 'No'),
                                (FastICA(n_components=n_ICA, random_state=1), 'ICA'),
@@ -628,10 +573,10 @@ def experiment_4(X_train, y_train, X_test, y_test, n_features, nn_params, datase
             X_train_reduced = X_train
             X_test_reduced = X_test
 
-        # gs_params = {'hidden_layer_sizes': [(5), (10),(5,5),(5,10,5),(50),(50,50),(100),(200),(400)],
-        #              'learning_rate_init': [0.0025*n for n in range(1,11)]}
+        gs_params = {'hidden_layer_sizes': [(5), (10),(5,5),(5,10,5),(50),(50,50),(100),(200),(400)],
+                     'learning_rate_init': [0.0025*n for n in range(1,11)]}
 
-        # print_gridsearch_results(clf=MLPClassifier(max_iter=10000), parameters=gs_params, X_train=X_train_reduced, y_train=y_train)
+        print_gridsearch_results(clf=MLPClassifier(max_iter=10000), parameters=gs_params, X_train=X_train_reduced, y_train=y_train)
 
         hidden_layers, learning_rate = nn_params[reducer_name]
         predict_with_nn(X_train=X_train_reduced, y_train=y_train, X_test=X_test_reduced, y_test=y_test, 
@@ -657,10 +602,10 @@ def experiment_5(X_train, y_train, X_test, y_test, n_clusters_k_means, n_cluster
         X_train_clustered = encoder.fit_transform(np.atleast_2d(clusterer.predict(X_train)).T)
         X_test_clustered = encoder.fit_transform(np.atleast_2d(clusterer.predict(X_test)).T)
 
-        # gs_params = {'hidden_layer_sizes': [(5), (10),(5,5),(5,10,5),(50),(50,50),(100),(200),(400)],
-        #              'learning_rate_init': [0.0025*n for n in range(1,11)]}
+        gs_params = {'hidden_layer_sizes': [(5), (10),(5,5),(5,10,5),(50),(50,50),(100),(200),(400)],
+                     'learning_rate_init': [0.0025*n for n in range(1,11)]}
 
-        # print_gridsearch_results(clf=MLPClassifier(max_iter=10000), parameters=gs_params, X_train=X_train_clustered, y_train=y_train)
+        print_gridsearch_results(clf=MLPClassifier(max_iter=10000), parameters=gs_params, X_train=X_train_clustered, y_train=y_train)
 
         hidden_layers, learning_rate = nn_params[clusterer_name]
         predict_with_nn(X_train=X_train_clustered, y_train=y_train, X_test=X_test_clustered, y_test=y_test, 
@@ -671,10 +616,6 @@ def initial_visualization(data, X, y, column):
     visualizer = Rank2D(algorithm='pearson')
     visualizer.fit_transform(X)
     visualizer.show()
-
-    # visualizer = JointPlotVisualizer(columns=column)
-    # visualizer.fit_transform(X, y)
-    # visualizer.show()
 
 
 def print_gridsearch_results(clf, parameters, X_train, y_train, verbose=False):
@@ -767,39 +708,6 @@ def run():
         'GMM':     ((5,10,5), 0.025)
     }
 
-    # red wine vs white wine
-    n_features_w = {
-        'ICA': 10,  # or 5 or 8. knee at 10.
-        'PCA': 5,  # knees: 5 for avg eigenvalues, 4 for sum eigenvalues
-        'RP': 9,  # threshold at 75% kept, no knees
-        'KPCA': 2 # knee at 2 for sum of poly kernel
-    }
-
-    n_clusters_k_means_w = {
-        'No': 3,
-        'ICA': 5,
-        'PCA': 3,
-        'RP': 3,
-        'KPCA': 3 # rbf kernel
-    }
-
-    n_clusters_gmm_w = {
-        'No': 2,
-        'ICA': 3, # or 7
-        'PCA': 3, # or 5 or 7
-        'RP': 3, # or 4
-        'KPCA': 3 # rbf kernel
-    }
-
-    nn_params_w = {
-        'ICA':     ((50,50), 0.0075),
-        'PCA':     ((5,5), 0.01),
-        'RP':      (400, 0.005),
-        'KPCA':    (50, 0.0125),
-        'K-Means': (5, 0.0025),
-        'GMM':     (5, 0.0025)
-    }
-
     # telescope
     n_features_tel = {
         'ICA': 7,
@@ -838,15 +746,8 @@ def run():
 
     for dataset in datasets:
         print(f'\nResults for {dataset}:')
-    
-        if dataset == 'Wine Quality':
-            data, X, y = import_wine_data()
-            n_clusters_k_means = n_clusters_k_means_w
-            n_clusters_gmm = n_clusters_gmm_w
-            n_features = n_features_w
-            nn_params = nn_params_w
         
-        elif dataset == 'Red Wine Quality':
+        if dataset == 'Red Wine Quality':
             data, X, y = import_red_wine_data()
             n_clusters_k_means = n_clusters_k_means_rw
             n_clusters_gmm = n_clusters_gmm_rw
@@ -866,23 +767,23 @@ def run():
         X_train, X_test, y_train, y_test = split_and_scale(X, y)
         
         # clustering
-        # _, _ = experiment_1(X=X_train, y=y_train, n_clusters_k_means=n_clusters_k_means, n_clusters_gmm=n_clusters_gmm, 
-        #                 dataset_name=dataset, save_graphs=True)
+        _, _ = experiment_1(X=X_train, y=y_train, n_clusters_k_means=n_clusters_k_means, n_clusters_gmm=n_clusters_gmm, 
+                        dataset_name=dataset, save_graphs=True)
         
         # dimensionality reduction
         experiment_2(X=X_train, y=y_train, n_features=n_features, dataset_name=dataset, save_graphs=True)
 
         # dimensionality reduction then clustering
-        # experiment_3(X=X_train, y=y_train, n_features=n_features, n_clusters_k_means=n_clusters_k_means, 
-        #                 n_clusters_gmm=n_clusters_gmm, dataset_name=dataset)
+        experiment_3(X=X_train, y=y_train, n_features=n_features, n_clusters_k_means=n_clusters_k_means, 
+                        n_clusters_gmm=n_clusters_gmm, dataset_name=dataset)
 
         # dimensionality reduction then nn
-        # experiment_4(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, n_features=n_features, 
-        #                 nn_params=nn_params, dataset_name=dataset)
+        experiment_4(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, n_features=n_features, 
+                        nn_params=nn_params, dataset_name=dataset)
         
         # clustering then nn
-        # experiment_5(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, n_clusters_k_means=n_clusters_k_means, 
-        #                 n_clusters_gmm=n_clusters_gmm, nn_params=nn_params, dataset_name=dataset)
+        experiment_5(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, n_clusters_k_means=n_clusters_k_means, 
+                        n_clusters_gmm=n_clusters_gmm, nn_params=nn_params, dataset_name=dataset)
 
 
 
