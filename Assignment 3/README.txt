@@ -3,6 +3,8 @@ April Trusty (atrusty6@gatech.edu)
 
 Code is saved at: https://github.com/apriltrusty/CS7641/tree/master/Assignment%203
 
+Data is located at: https://github.com/apriltrusty/CS7641/tree/master/Assignment%201/Data
+
 To run experiments and produce all graphs, Excel experiment results, and terminal output results, run:
 
 python3 a3.py
