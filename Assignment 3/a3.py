@@ -21,15 +21,6 @@ from sklearn.random_projection import GaussianRandomProjection as RP
 from yellowbrick.features import Rank2D
 from kneed import KneeLocator
 
-"""If you're asking about cluster or dim. red. experiments, there are really two phases... 
-one in which you pick K clusters or N components. 
-
-The other is "validating" that optimal # and building more intuition after running the algorithm... 
-so looking at the quality of the clusters, seeing how your features contribute to your clusters, 
-visualizing these using various techniques (up to you). 
-
-For dim. red., you can look at what your projection looks like, try to see how your projection 
-matches up with the original features, or introduce some other metric... whatever makes sense."""
 
 # width, height
 m = 1.6/2.33
@@ -676,25 +667,25 @@ def run():
 
     # red wine 
     n_features_rw = {
-        'ICA': 8,  # 8 by eyeballing. 4 or 5 by knees (max & avg, respectively).
-        'PCA': 5,  # knees: 5 for sum eigenvalues, 4 for avg eigenvalues
-        'RP': 7,  # knee at 7
+        'ICA': 8,
+        'PCA': 5,
+        'RP': 7,
         'KPCA': 6
     }
 
     n_clusters_k_means_rw = {
-        'No': 7, # or 5 or 37 or 81 (but these break the NN experiment; not all clusters have assignments)
-        'ICA': 7, # 6?
-        'PCA': 7, # 4?
+        'No': 7,
+        'ICA': 7,
+        'PCA': 7,
         'RP': 3,
         'KPCA': 5
     }
 
     n_clusters_gmm_rw = {
-        'No': 7, # or 4 or 81 or 97 or 14
-        'ICA': 5, # 3 or 4 or 5
-        'PCA': 6, # or 7
-        'RP': 5, # or 3
+        'No': 7,
+        'ICA': 5,
+        'PCA': 6,
+        'RP': 5,
         'KPCA': 5
     }
 
@@ -711,29 +702,29 @@ def run():
     # telescope
     n_features_tel = {
         'ICA': 7,
-        'PCA': 5, # 5 by sum, 3 by avg
+        'PCA': 5,
         'RP': 9,
-        'KPCA': 4 # 3 for polykernel by sum, 4 for RBF, 3 by avg for sigmoid, 5 by sum for sigmoid
+        'KPCA': 4
     }
 
     n_clusters_k_means_tel = {
         'No': 3,
         'ICA': 8,
         'PCA': 3,
-        'RP': 2, # or 5
-        'KPCA': 5 # rbf kernel
+        'RP': 2,
+        'KPCA': 5
     }
 
     n_clusters_gmm_tel = {
-        'No': 4, # or 2 or 3
-        'ICA': 4, # or 4 or 7
-        'PCA': 4, # or 2
-        'RP': 4, # or 2
-        'KPCA': 6 # or 10 or 5
+        'No': 4,
+        'ICA': 4,
+        'PCA': 4,
+        'RP': 4,
+        'KPCA': 6
     }
 
     nn_params_tel = {
-        'No':      ((150), 0.003), # ((50,50), 0.02)
+        'No':      ((150), 0.003),
         'ICA':     ((400), 0.0125),
         'PCA':     ((5), 0.0125),
         'RP':      ((50), 0.005),
