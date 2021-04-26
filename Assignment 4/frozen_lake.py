@@ -52,7 +52,7 @@ def Q_learning(env, gamma=0.99, start_epsilon=0.3, epsilon_decay=0.1, epsilon_fl
                     alpha = base_alpha/(1+episode/alpha_decay_speed)                # this method satisfies the convergence qualification
                 else:
                     assert type(alpha_decay) is float, 'Check alpha decay method.'
-                    alpha *= alpha_decay                                            # but this method is faster and gets close results
+                    alpha *= alpha_decay                                            # but this method is faster and gets very good results
 
         t0 = perf_counter()
         while not done:

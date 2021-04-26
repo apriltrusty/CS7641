@@ -50,7 +50,7 @@ def Q_learning(env, gamma=0.05, start_epsilon=0.9, epsilon_decay=0.9, epsilon_fl
                     alpha = base_alpha/(1+episode/alpha_decay_speed)                # this method satisfies the convergence qualification
                 else:
                     assert type(alpha_decay) is float, 'Check alpha decay method.'
-                    alpha *= alpha_decay                                            # but this method is faster and gets nearly as good results
+                    alpha *= alpha_decay                                            # but this method is faster and gets very good results
 
         t0 = perf_counter()
         while not done:
@@ -167,7 +167,7 @@ def run_experiment(size=11, max_move=3):
         if solver == 'Policy Iteration':
             for gamma in [0.8, 0.9, 0.95, 0.99]:
                 print(f'gamma={gamma}')
-                policy = policy_iteration(env=env, discount=gamma, precision=0.0001, verbose=True) # precision and gamma are VERY VERY important for this
+                policy = policy_iteration(env=env, discount=gamma, precision=0.0001, verbose=True)
                 _ = test_final_policy(env=env, policy=policy, verbose=True)
         elif solver == 'Value Iteration':
             for gamma in [0.8, 0.9, 0.95, 0.99]:
