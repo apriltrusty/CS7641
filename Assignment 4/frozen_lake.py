@@ -80,7 +80,6 @@ def Q_learning(env, gamma=0.99, start_epsilon=0.3, epsilon_decay=0.1, epsilon_fl
                 else: result = 0
             
             Q[state, action] = Q[state, action] + alpha * target
-
             state = next_state
 
 
@@ -99,9 +98,8 @@ def Q_learning(env, gamma=0.99, start_epsilon=0.3, epsilon_decay=0.1, epsilon_fl
         if verbose and episode % 100 == 0:
             print(f'Episode #{episode}\tReward:\t{round(total_reward,0)}\tResult:\t{result}\tWin %:\t{win_pct}%\tEpsilon:\t{round(epsilon,3)}\tAlpha:\t{round(alpha,3)}\tValue Change:\t{round(max_value_change,4)}\t\tAvg Q:\t{np.average(Q)}\tNum Steps:\t{num_steps}')
 
-        # check for convergence at episode 1000 and beyond. check 100 most recent items.
+        # check for convergence
         if episode > 1000:
-            # check convergence
             if max(stats['max value change'][-10:]) < tol:
                 print('Q-Learning converged at episode {}.'.format(episode))
                 converged = True
@@ -114,7 +112,7 @@ def Q_learning(env, gamma=0.99, start_epsilon=0.3, epsilon_decay=0.1, epsilon_fl
     return final_policy, stats, values
 
 
-def test_final_policy(env, policy=None, num_episodes=100, shaping=None, verbose=False):
+def test_final_policy(env, policy=None, num_episodes=100, verbose=False):
     reward_log = []
     win_log = []
     step_log = []
@@ -137,17 +135,8 @@ def test_final_policy(env, policy=None, num_episodes=100, shaping=None, verbose=
             next_state, reward, done, _ = env.step(action)
             
             if done:
-                if reward == 1:
-                    if shaping is not None: reward = shaping['WIN']
-                    win_log.append(1)
-                    # print(f'{episode}: win, {num_steps} steps')
-                else:
-                    # assert reward == 1
-                    if shaping is not None: reward = shaping['LOSE']
-                    win_log.append(0)
-                    # print(f'{episode}: lose, {num_steps} steps')
-            else:
-                if shaping is not None: reward = shaping['STEP']
+                if reward == 1: win_log.append(1)
+                else: win_log.append(0)
             
             total_reward += reward
             state = next_state
@@ -178,80 +167,78 @@ def run_experiment(size=4, penalty=-0.001):
     env = gym.make('FrozenLake-v0')
     # p is the probability that any square is frozen
     lake = gym.envs.toy_text.frozen_lake.generate_random_map(size=size, p=0.9)
-    
-    # for size 32, 0.002 works well, for 50, 0.001 much better, and 0.0005 even better. larger environments do better 
-    # with smaller penalties... makes sense. 50 $ -0.001 work with PI and VI now.
     env = gym.envs.toy_text.frozen_lake.FrozenLakeEnv(desc=lake, is_slippery=True, step_penalty=penalty)
     env = env.unwrapped
     
     env.render()
     env.seed(0)
 
-    solvers = ['Value Iteration']
+    solvers = ['Value Iteration','Policy Iteration','Q-Learning']
     policies = {}
 
-    def markey_run_experiment(gamma=0.99, base_alpha=0.6, alpha_decay=0.95, start_epsilon=0.3, epsilon_decay=0.2, param=None, val=None):
-        print(f'{param}={val}')
+    def hyperparam_study(gamma=0.99, base_alpha=0.6, alpha_decay=0.95, start_epsilon=0.3, epsilon_decay=0.2, param=None, val=None):
+        print(f'\nResults for {param}={val}')
         t0 = perf_counter()
-        if solver == 'Policy Iteration':
-            policy = policy_iteration(env=env, discount=gamma, precision=0.0001) # precision and gamma are VERY VERY important for this
-            policies['PI'] = policy
-        elif solver == 'Value Iteration':
-            policy = value_iteration(env=env, discount=gamma, precision=0.0001) # 0.00000000000001
-            policies['VI'] = policy
-        else:
-            assert solver == 'Q-Learning', 'Check solver name.'
-            policy, stats, values = Q_learning(env=env, gamma=gamma, base_alpha=base_alpha, alpha_decay=alpha_decay, alpha_decay_speed=100, \
-                start_epsilon=start_epsilon, epsilon_decay=epsilon_decay, epsilon_floor=0.01, num_episodes=20000, verbose=False) # 0.3 start eps and 0.1 eps decay
+        policy, stats, values = Q_learning(env=env, gamma=gamma, base_alpha=base_alpha, alpha_decay=alpha_decay, alpha_decay_speed=100, \
+            start_epsilon=start_epsilon, epsilon_decay=epsilon_decay, epsilon_floor=0.01, num_episodes=20000, verbose=False)
 
         print(f'Finished {solver} in {round((perf_counter()-t0)/60,2)} minutes.')
         print('Now testing final policy.')
         _, _ = test_final_policy(env=env, policy=policy, verbose=True)
         policies[solver] = policy
 
-        exit(0)
-
-        # if solver == 'Q-Learning':
-        #     with pd.ExcelWriter(f'Excel/frozenlake_{size}.xlsx',mode='a') as writer:
-        #                 stats.to_excel(writer, sheet_name=f'Stats, {param}={val}')
-        #                 values.to_excel(writer, sheet_name=f'Values, {param}={val}')
+        assert solver == 'Q-Learning', 'Check solver, only Q-Learning accepted'
+        with pd.ExcelWriter(f'Excel/frozenlake_{size}.xlsx',mode='a') as writer:
+                    stats.to_excel(writer, sheet_name=f'Stats, {param}={val}')
+                    values.to_excel(writer, sheet_name=f'Values, {param}={val}')
 
     for solver in solvers:
         print(f'======={solver} on size {size}=======')
-        
-        # for alpha_decay in [0.9, 0.6, 0.4, 'harmonic']:
-        #     markey_run_experiment(alpha_decay=alpha_decay, param='alpha decay', val=alpha_decay)
-        # for epsilon in [0.9, 0.6, 0.4, 0.1]:
-        #     markey_run_experiment(start_epsilon=epsilon, param='epsilon', val=epsilon)
-        # for epsilon_decay in [0.9, 0.6, 0.4, 0.1]:
-        #     markey_run_experiment(epsilon_decay=epsilon_decay, param='epsilon decay', val=epsilon_decay)
-        # for alpha in [0.9, 0.6, 0.4, 0.1]:
-        #     markey_run_experiment(base_alpha=alpha, param='alpha', val=alpha)
-        # for gamma in [0.9]:
-        # markey_run_experiment()
+        if solver == 'Policy Iteration':
+            for gamma in [0.8, 0.9, 0.95, 0.99]:
+                print(f'gamma={gamma}')
+                policy = policy_iteration(env=env, discount=gamma, precision=0.0001, verbose=True) # precision and gamma are VERY VERY important for this
+                _ = test_final_policy(env=env, policy=policy, verbose=True)
+        elif solver == 'Value Iteration':
+            for gamma in [0.8, 0.9, 0.95, 0.99]:
+                print(f'gamma={gamma}')
+                policy = value_iteration(env=env, discount=gamma, precision=0.0001, verbose=True)
+                _ = test_final_policy(env=env, policy=policy, verbose=True)
+        else:
+            assert solver == 'Q-Learning', 'Check solver name.'
+            for alpha_decay in [0.9, 0.6, 0.4, 'harmonic']:
+                hyperparam_study(alpha_decay=alpha_decay, param='alpha decay', val=alpha_decay)
+            for epsilon in [0.9, 0.6, 0.4, 0.1]:
+                hyperparam_study(start_epsilon=epsilon, param='epsilon', val=epsilon)
+            for epsilon_decay in [0.9, 0.6, 0.4, 0.1]:
+                hyperparam_study(epsilon_decay=epsilon_decay, param='epsilon decay', val=epsilon_decay)
+            for alpha in [0.9, 0.6, 0.4, 0.1]:
+                hyperparam_study(base_alpha=alpha, param='alpha', val=alpha)
+            for gamma in [0.8, 0.9, 0.95, 0.99]:
+                hyperparam_study(gamma=gamma, param='gamma', val=gamma)
 
         t0 = perf_counter()
-        policy, stats, values = Q_learning(env=env, gamma=0.999, base_alpha=0.9, alpha_decay=0.99, alpha_decay_speed=100, \
-                start_epsilon=0.3, epsilon_decay=0.1, epsilon_floor=0.01, num_episodes=200000, tol=0.00001, verbose=True)
+        if size == 8:
+            policy, stats, values = Q_learning(env=env, gamma=0.99, base_alpha=0.6, alpha_decay=0.6, alpha_decay_speed=100, \
+                    start_epsilon=0.3, epsilon_decay=0.4, epsilon_floor=0.01, num_episodes=200000, tol=0.00001, verbose=True)
+            
+            to_print = np.reshape(np.array(policy),(8,8))
         
-        to_print = np.reshape(np.array(policy),(32,32))
+        else:
+            assert size == 32
+            policy, stats, values = Q_learning(env=env, gamma=0.999, base_alpha=0.9, alpha_decay=0.99, alpha_decay_speed=100, \
+                    start_epsilon=0.3, epsilon_decay=0.1, epsilon_floor=0.01, num_episodes=200000, tol=0.00001, verbose=True)
+
+            to_print = np.reshape(np.array(policy),(32,32))[-8:,-8:]
+        
         print(to_print)
-        print(to_print[-8:,-8:])
 
         print(f'Finished {solver} in {round((perf_counter()-t0)/60,2)} minutes.')
         print('Now testing final policy.')
         _, _ = test_final_policy(env=env, policy=policy)
-
-
-
-
-        # if np.all(policies['Policy Iteration'] == policies['Value Iteration']): 
-        #     print('PI and VI same policy')
-        # else:
-        #     print('PI and VI different policy')
     
 
-size_range = [(32, -0.002)]
+size_range = [(8, -0.001), (32, -0.002)]
 
 for size, penalty in size_range:
     run_experiment(size=size, penalty=penalty)
