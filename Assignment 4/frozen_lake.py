@@ -117,6 +117,7 @@ def Q_learning(env, gamma=0.99, start_epsilon=0.3, epsilon_decay=0.1, epsilon_fl
 def test_final_policy(env, policy=None, num_episodes=100, shaping=None, verbose=False):
     reward_log = []
     win_log = []
+    step_log = []
 
     t0 = perf_counter()
     for episode in range(num_episodes):
@@ -156,15 +157,17 @@ def test_final_policy(env, policy=None, num_episodes=100, shaping=None, verbose=
                 done=True
 
         reward_log.append(total_reward)
+        step_log.append(num_steps)
         if verbose: print(total_reward)
 
     t1 = perf_counter()
     
-    print('{} wins out of {} episodes: {}% win rate. Average reward: {} (+/-{}). Time: {} seconds.'.format(np.sum(win_log), num_episodes, 
+    print('{} wins out of {} episodes: {}% win rate. Average reward: {} (+/-{}). Time: {} seconds. Average steps: {}'.format(np.sum(win_log), num_episodes, 
                                                     round(100*np.sum(win_log)/num_episodes,4), 
                                                     round(np.average(reward_log),4),
                                                     round(np.std(reward_log),4),
-                                                    round(t1-t0,4)))
+                                                    round(t1-t0,4),
+                                                    np.average(step_log)))
     
     return win_log, reward_log
 
@@ -184,10 +187,10 @@ def run_experiment(size=4, penalty=-0.001):
     env.render()
     env.seed(0)
 
-    solvers = ['Q-Learning']
+    solvers = ['Value Iteration']
     policies = {}
 
-    def markey_run_experiment(gamma=0.95, base_alpha=0.6, alpha_decay=0.95, start_epsilon=0.3, epsilon_decay=0.2, param=None, val=None):
+    def markey_run_experiment(gamma=0.99, base_alpha=0.6, alpha_decay=0.95, start_epsilon=0.3, epsilon_decay=0.2, param=None, val=None):
         print(f'{param}={val}')
         t0 = perf_counter()
         if solver == 'Policy Iteration':
@@ -203,8 +206,10 @@ def run_experiment(size=4, penalty=-0.001):
 
         print(f'Finished {solver} in {round((perf_counter()-t0)/60,2)} minutes.')
         print('Now testing final policy.')
-        _, _ = test_final_policy(env=env, policy=policy)
+        _, _ = test_final_policy(env=env, policy=policy, verbose=True)
         policies[solver] = policy
+
+        exit(0)
 
         # if solver == 'Q-Learning':
         #     with pd.ExcelWriter(f'Excel/frozenlake_{size}.xlsx',mode='a') as writer:
@@ -223,7 +228,7 @@ def run_experiment(size=4, penalty=-0.001):
         # for alpha in [0.9, 0.6, 0.4, 0.1]:
         #     markey_run_experiment(base_alpha=alpha, param='alpha', val=alpha)
         # for gamma in [0.9]:
-        #     markey_run_experiment(gamma=gamma, param='gamma', val=gamma)
+        # markey_run_experiment()
 
         t0 = perf_counter()
         policy, stats, values = Q_learning(env=env, gamma=0.999, base_alpha=0.9, alpha_decay=0.99, alpha_decay_speed=100, \
